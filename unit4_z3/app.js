@@ -2,7 +2,7 @@ const app = new PIXI.Application({
     width: 512,
     height: 512,
     antialias: true,
-    // transparent: true,
+    transparent: true,
     backgroundColor: '0xFFFFFF',
     // resolution: 1
     resizeTo: window,
