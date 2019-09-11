@@ -2,13 +2,13 @@
 
 ## `unit4_z3`
 
-![](unit4_z3/preview.png)
+![](sketches/unit4_z3/preview.png)
 
 
 ## `rd_simulation` 
 
-![](rd_simulation/preview.png)
+![](sketches/rd_simulation/preview.png)
 
 ## `8m19_pattern` 
 
-![](8m19_pattern/pattern.png)
+![](sketches/8m19_pattern/pattern.png)
