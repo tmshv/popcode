@@ -82,24 +82,8 @@ function initApp(resources) {
         return sprite
     }
 
-    const createImg = url => {
-        const img = PIXI.Sprite.from(url)
-        img.anchor.set(0.5)
-        img.position.set(
-            app.screen.width / 2,
-            app.screen.height / 2,
-        )
-
-        const scale = (app.screen.width / img.width) * 0.95
-        img.scale.set(scale)
-
-        app.stage.addChild(img)
-
-        return img
-    }
-
     const setupChannelSprite = img => {
-        const scale = (app.screen.width / img.width) * 0.95
+        const scale = (app.screen.width / img.width) * 0.75
         img.scale.set(scale)
         img.anchor.set(0.5)
 
@@ -196,8 +180,8 @@ function initApp(resources) {
 
         if (Math.random() < prob) {
             ch2.scale.set(
-                1,
                 1 + Math.random() * 0.5,
+                1,
             )
             // ch2.position.set(
             //     1 + Math.random() * 0.5,
