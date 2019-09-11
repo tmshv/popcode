@@ -1,15 +1,15 @@
 let grid = [];
 let next = [];
 
-let gridWidth = 200
-let gridHeight = 200
+let gridWidth = 100
+let gridHeight = 100
 
 const dA = 1
 const dB = 0.5
 const feed = 0.055
 const k = 0.062
 
-const S = 1
+const S = 4
 
 function setup() {
     createCanvas(gridWidth * S, gridHeight * S);
