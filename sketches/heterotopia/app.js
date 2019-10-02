@@ -364,11 +364,58 @@ function initApp(app, resources) {
 
     console.log(`${app.screen.width}x${app.screen.height}`)
 
-    const w = width
-    const h = height
     const v = Math.round(
-        (w * h) * 0.01
+        (width * height) * 0.01
     )
+
+    console.log('width', width)
+    console.log('height', height)
+    console.log('square', square)
+
+    const metaballAgents = repeat(15)(i => {
+        const x = Math.random() * width
+        const y = Math.random() * height
+
+        const mass = width * 0.15
+
+        const agent = new Agent(x, y, mass)
+        agent.getVelocitySpeed = () => 1 + Math.random()
+
+        return agent
+    })
+
+    const mask1 = (new MetaballTextureBuilder())
+        .setFrame(width, height)
+        .setBlurValue(15)
+        .setContrastValue(1000)
+        .setAgents(metaballAgents)
+        .setRenderStep(4)
+        .setAgentMassMultipier(0.1)
+        .build()
+    const mask2 = (new MetaballTextureBuilder())
+        .setFrame(width, height)
+        .setBlurValue(15)
+        .setContrastValue(1000)
+        .setAgents(metaballAgents)
+        .setRenderStep(4)
+        .setAgentMassMultipier(0.01)
+        .build()
+
+    const maskSprite1 = mask1.sprite
+    maskSprite1.anchor.set(0.5)
+    maskSprite1.position.set(
+        app.screen.width / 2,
+        app.screen.height / 2,
+    )
+    app.stage.addChild(maskSprite1)
+
+    const maskSprite2 = mask2.sprite
+    maskSprite2.anchor.set(0.5)
+    maskSprite2.position.set(
+        app.screen.width / 2,
+        app.screen.height / 2,
+    )
+    app.stage.addChild(maskSprite2)
 
     const container = setupContainer(new PIXI.Container(), 0.5, [width, height], [
         app.screen.width / 2,
@@ -383,8 +430,8 @@ function initApp(app, resources) {
     container.addChild(container2)
 
     const circleAgents = repeat(v)(i => {
-        const x = Math.random() * w
-        const y = Math.random() * h
+        const x = Math.random() * width
+        const y = Math.random() * height
         const angle = Math.random() * Math.PI * 2
         const radius = 3 + Math.round(
             Math.random() * 2
@@ -410,8 +457,8 @@ function initApp(app, resources) {
         return agent
     })
     const lineAgents = repeat(v)(i => {
-        const x = Math.random() * w
-        const y = Math.random() * h
+        const x = Math.random() * width
+        const y = Math.random() * height
         const angle = Math.random() * Math.PI * 2
 
         const agent = (new Agent(x, y))
@@ -437,7 +484,7 @@ function initApp(app, resources) {
     const agents = [...circleAgents, ...lineAgents]
 
     const title = new PIXI.Sprite(resources.title.texture)
-    title.scale.set(calcScale(app, 10, title.width))
+    title.scale.set(calcScale(app, padding, title.width))
     title.anchor.set(0.5)
     title.position.set(
         app.screen.width / 2,
@@ -445,21 +492,15 @@ function initApp(app, resources) {
     )
 
     const title2 = new PIXI.Sprite(resources.titleBlack.texture)
-    title2.scale.set(calcScale(app, 10, title2.width))
+    title2.scale.set(calcScale(app, padding, title2.width))
     title2.anchor.set(0.5)
     title2.position.set(
         app.screen.width / 2,
         app.screen.height / 2,
     )
 
-    // const noise1 = new PIXI.Sprite(resources.noise1.texture)
-    // container1.addChild(noise1)
-
-    // const noise2 = new PIXI.Sprite(resources.noise2.texture)
-    // container2.addChild(noise2)
-
-    // container1.mask = noise1
-    // container2.mask = noise2
+    container1.mask = maskSprite1
+    container2.mask = maskSprite2
 
     app.stage.addChild(title2)
     app.stage.addChild(title)
@@ -486,5 +527,17 @@ function initApp(app, resources) {
             })
             agent.render()
         }
+
+        for (const agent of metaballAgents) {
+            agent.run({
+                border: {
+                    width,
+                    height
+                }
+            })
+        }
+
+        mask1.update(app)
+        mask2.update(app)
     })
 }
