@@ -76,10 +76,12 @@ class Vector {
 }
 
 class Agent {
-    constructor(x, y) {
+    constructor(x, y, mass) {
         this.location = new Vector(x, y)
-        this.velocity = new Vector(0, 0)
+        this.velocity = new Vector(1, 1)
         this.acceleration = new Vector(0, 0)
+
+        this.mass = mass
     }
 
     getVelocitySpeed(mouse) {
@@ -109,10 +111,20 @@ class Agent {
     }
 
     fitBorders(width, height) {
-        if (this.location.x < 0 || this.location.x > width) {
+        if (this.location.x < 0) {
+            this.location.x = 1
             this.velocity.x *= -1
         }
-        if (this.location.y < 0 || this.location.y > height) {
+        if (this.location.x > width) {
+            this.location.x = width - 1
+            this.velocity.x *= -1
+        }
+        if (this.location.y < 0) {
+            this.location.y = 1
+            this.velocity.y *= -1
+        }
+        if (this.location.y > height) {
+            this.location.y = height - 1
             this.velocity.y *= -1
         }
     }
@@ -162,11 +174,151 @@ function createGridSprite(texture, size) {
 app.loader
     .add('title', 'title.svg')
     .add('titleBlack', 'title_black.svg')
+    .add('noise', 'noise.jpg')
+    .add('test', 'test.jpg')
     .add('noise1', 'noise1_b.jpg')
     .add('noise2', 'noise2_b.jpg')
     .load((loader, resources) => {
+        // initTest(app, resources)
         initApp(app, resources)
     })
+
+function renderMetaball(g, factor, step, width, height, agents, color) {
+    g.lineStyle(0)
+    g.beginFill(color, 1)
+
+    for (let x = 0; x < width; x += step) {
+        for (let y = 0; y < height; y += step) {
+            let sum = 0;
+
+            for (const a of agents) {
+                const dx = x - a.location.x;
+                const dy = y - a.location.y;
+                const massQuad = a.mass * a.mass
+
+                sum += massQuad / (dx * dx + dy * dy)
+            }
+
+            if (sum > factor) {
+                g.drawRect(x, y, step, step)
+            }
+        }
+    }
+
+    g.endFill()
+}
+
+function initTest(app, resources) {
+    const padding = 50
+    const width = app.screen.width - (padding * 2)
+    const height = width * 0.275
+    const square = width * height
+
+    console.log('width', width)
+    console.log('height', height)
+    console.log('square', square)
+
+    const contrastFilter = new PIXI.filters.ColorMatrixFilter()
+    contrastFilter.contrast(1000)
+
+    const container = new PIXI.Container()
+    app.stage.addChild(container)
+
+    const metaballContainer = new PIXI.Container()
+    metaballContainer.filters = [
+        new PIXI.filters.BlurFilter(15),
+        contrastFilter,
+    ]
+    // app.stage.addChild(metaballContainer)
+
+    const metaballAgents = repeat(15)(i => {
+        const x = Math.random() * width
+        const y = Math.random() * height
+
+        const mass = width * 0.15
+
+        const agent = new Agent(x, y, mass)
+        agent.getVelocitySpeed = () => 1 + Math.random()
+
+        return agent
+    })
+
+    // const frame = new PIXI.Rectangle(10, 10, 100, 100)
+    // const orig = new PIXI.Rectangle(5, 5, 10, 10)
+    const frame = new PIXI.Rectangle(500, 500, 100, 100)
+    const trim = new PIXI.Rectangle(0, 0, 128, 128)
+
+    // const texture = new PIXI.Texture(resources.noise.texture, frame, orig, trim)
+    const texture = new PIXI.Texture(resources.test.texture)
+    // texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT
+    // texture.orig = orig
+    // texture.frame = frame
+    // texture.trim = trim
+    const sprite = new PIXI.Sprite(texture)
+    // sprite.scale.set(0.5)
+    container.addChild(sprite)
+
+    const metaballGraphics = new PIXI.Graphics()
+    metaballContainer.addChild(metaballGraphics)
+
+    // const g = new PIXI.Graphics()
+    // g.filters = [new PIXI.filters.BlurFilter(5)]
+
+    // g.lineStyle(0)
+    // g.beginFill(0xffffff, 1)
+    // g.drawCircle(0, 0, 50)
+    // g.endFill()
+    // app.stage.addChild(g)
+
+    const brt = new PIXI.BaseRenderTexture(width, height, PIXI.SCALE_MODES.LINEAR, 1)
+    const rt = new PIXI.RenderTexture(brt)
+    const metaballSprite = new PIXI.Sprite(rt)
+    metaballSprite.anchor.set(0.5)
+    metaballSprite.position.set(
+        app.screen.width / 2,
+        app.screen.height / 2,
+    )
+    app.stage.addChild(metaballSprite)
+
+    container.mask = metaballSprite
+
+    const sh = Math.sqrt(square)
+
+    app.ticker.add(() => {
+        metaballGraphics.clear()
+
+        // metaballGraphics.beginFill(0x000000)
+        // metaballGraphics.drawRect(0, 0, width, height + 2)
+        // metaballGraphics.endFill()
+
+        // renderMetaball(metaballGraphics, sh * 0.001, 4, width, height, metaballAgents, 0x303030)
+        // renderMetaball(metaballGraphics, sh * 0.001, 4, width, height, metaballAgents, 0x606060)
+        renderMetaball(metaballGraphics, 10, 4, width, height, metaballAgents, 0xffffff)
+        // renderMetaball(metaballGraphics, 30, 4, width, height, metaballAgents, 0x606060)
+
+        for (const agent of metaballAgents) {
+            agent.run({
+                border: {
+                    width,
+                    height
+                }
+            })
+
+            // metaballGraphics.lineStyle(0)
+            // metaballGraphics.beginFill(0x000000, 1)
+            // metaballGraphics.drawCircle(agent.location.x, agent.location.y, 3)
+            // metaballGraphics.endFill()
+        }
+
+        app.renderer.render(metaballContainer, rt)
+
+        // console.log('tick')
+        // frame.x += 1
+        // // trim.x += 1
+        // texture.updateUvs()
+        // texture.updateUvs()
+    })
+}
 
 function initApp(app, resources) {
     mouse = {
