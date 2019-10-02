@@ -4,6 +4,8 @@ const app = new PIXI.Application({
     antialias: true,
     transparent: true,
     backgroundColor: '0xFFFFFF',
+    // backgroundColor: '#14141e',
+    // backgroundColor: '0x000000',
     // resolution: 1
     resizeTo: window,
     autoDensity: true,
@@ -13,6 +15,7 @@ document.body.appendChild(app.view);
 
 app.loader
     .add('unit4', 'unit4.png')
+    // .add('unit4', 'unit4_transparent.png')
     .add('displacementMap', 'displacement_map_repeat.jpg')
     .load((loader, resources) => {
         // initTestApp(resources)
@@ -20,9 +23,39 @@ app.loader
     })
 
 function initTestApp(resources) {
-    const graphics = createMask()
+    let ch
+    ch = setupChannelSprite(new PIXI.Sprite(resources.unit4.texture))
+    ch.filters = [
+        createInvertColorFilter(),
+        createChannelFilter([1, 0, 1]),
+    ]
 
-    app.stage.addChild(graphics)
+    ch = setupChannelSprite(new PIXI.Sprite(resources.unit4.texture))
+    ch.filters = [
+        createInvertColorFilter(),
+        createChannelFilter([1, 1, 0]),
+    ]
+
+    ch = setupChannelSprite(new PIXI.Sprite(resources.unit4.texture))
+    ch.filters = [
+        createInvertColorFilter(),
+        createChannelFilter([0, 1, 1]),
+    ]
+
+    app.stage.addChild(ch)
+}
+
+function createInvertColorFilter() {
+    const v = -1
+    const f = new PIXI.filters.ColorMatrixFilter()
+    f.matrix = [
+        v, 0, 0, 0, 1,
+        0, v, 0, 0, 1,
+        0, 0, v, 0, 1,
+        0, 0, 0, 1, 0,
+    ]
+
+    return f
 }
 
 function createChannelFilter([r, g, b]) {
@@ -35,6 +68,16 @@ function createChannelFilter([r, g, b]) {
     ]
 
     return f
+}
+
+function createDisplacementFilter(sprite, scale) {
+    const filter = new PIXI.filters.DisplacementFilter(sprite)
+    filter.blendMode = PIXI.BLEND_MODES.MULTIPLY
+    // filter.blendMode = PIXI.BLEND_MODES.SCREEN
+    filter.scale.set(scale)
+    // displacementFilter.padding = 10;
+
+    return filter
 }
 
 function createMask() {
@@ -63,6 +106,23 @@ function createMask() {
     return graphics
 }
 
+function setPositionCenter(sprite) {
+    sprite.position.set(
+        app.screen.width / 2,
+        app.screen.height / 2,
+    );
+
+    return sprite
+}
+
+function setupChannelSprite(img) {
+    const scale = (app.screen.width / img.width) * 0.75
+    img.scale.set(scale)
+    img.anchor.set(0.5)
+
+    return setPositionCenter(img)
+}
+
 function initApp(resources) {
     let lastMouseX = 0
     let lastMouseY = 0
@@ -72,23 +132,6 @@ function initApp(resources) {
 
     const chContainer = new PIXI.Container()
     app.stage.addChild(chContainer)
-
-    const setPositionCenter = sprite => {
-        sprite.position.set(
-            app.screen.width / 2,
-            app.screen.height / 2,
-        );
-
-        return sprite
-    }
-
-    const setupChannelSprite = img => {
-        const scale = (app.screen.width / img.width) * 0.75
-        img.scale.set(scale)
-        img.anchor.set(0.5)
-
-        return setPositionCenter(img)
-    }
 
     const displacementSprite = setPositionCenter(new PIXI.Sprite(resources.displacementMap.texture))
     displacementSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT
@@ -102,29 +145,29 @@ function initApp(resources) {
     const displacementSprite3 = new PIXI.Sprite(texture)
     app.stage.addChild(displacementSprite3)
 
-    const createDisplacementFilter = (sprite, scale) => {
-        const filter = new PIXI.filters.DisplacementFilter(sprite)
-        filter.blendMode = PIXI.BLEND_MODES.MULTIPLY
-        filter.scale.set(scale)
-        // displacementFilter.padding = 10;
-
-        return filter
-    }
-
     let ch
     ch = setupChannelSprite(new PIXI.Sprite(resources.unit4.texture))
-    ch.filters = [createChannelFilter([255, 0, 255]), createDisplacementFilter(displacementSprite, 30)]
+    ch.filters = [
+        // createInvertColorFilter(),
+        createChannelFilter([1, 0, 1]),
+        createDisplacementFilter(displacementSprite, 30),
+    ]
     chContainer.addChild(ch)
     const ch1 = ch
 
     ch = setupChannelSprite(new PIXI.Sprite(resources.unit4.texture))
-    ch.filters = [createChannelFilter([255, 255, 0]), createDisplacementFilter(displacementSprite2, 60)]
+    ch.filters = [
+        // createInvertColorFilter(),
+        createChannelFilter([1, 1, 0]),
+        createDisplacementFilter(displacementSprite2, 60),
+    ]
     chContainer.addChild(ch)
     const ch2 = ch
 
     ch = setupChannelSprite(new PIXI.Sprite(resources.unit4.texture))
     ch.filters = [
-        createChannelFilter([0, 255, 255]),
+        // createInvertColorFilter(),
+        createChannelFilter([0, 1, 1]),
         createDisplacementFilter(displacementSprite3, 10),
     ]
     chContainer.addChild(ch)
@@ -145,7 +188,6 @@ function initApp(resources) {
     const imgScale = ch1.scale.x
 
     app.ticker.add(() => {
-        // Offset the sprite position to make vFilterCoord update to larger value. Repeat wrapping makes sure there's still pixels on the coordinates.
         // displacementSprite.x += Math.max(10, mouseSpeed)
         displacementSprite.x += 10 * mouseSpeed
         // Reset x to 0 when it's over width to keep values from going to very huge numbers.
