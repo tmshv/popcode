@@ -10,6 +10,10 @@ function repeat(times) {
     }
 }
 
+function interpolate(min, max, ratio) {
+    return min + (max - min) * ratio
+}
+
 const app = new PIXI.Application({
     // width: 512,
     // height: 512,
@@ -355,7 +359,7 @@ function initApp(app, resources) {
         agent.getVelocitySpeed = mouse => {
             const dist = agent.location.distance(mouse)
 
-            return dist * 0.0025
+            return interpolate(.1, 3, (dist / width))
         }
 
         const g = new PIXI.Graphics()
@@ -379,12 +383,11 @@ function initApp(app, resources) {
         agent.getVelocitySpeed = (mouse) => {
             const dist = agent.location.distance(mouse)
 
-            return m = 1 / (dist * 0.009)
+            return interpolate(5, 1, (dist / width))
         }
 
         const g = new PIXI.Graphics()
         g.lineStyle(5, 0x1ac4ff, 1)
-        // g.beginFill(0x1ac4ff, 1)
         g.lineTo(30, 0)
         g.endFill()
         container2.addChild(g)
@@ -423,8 +426,8 @@ function initApp(app, resources) {
     patternContainer.addChild(patternGraphic)
     patternContainer.mask = title
     app.stage.addChild(patternContainer)
-    
-    // app.stage.addChild(title2)
+
+    app.stage.addChild(title2)
     app.stage.addChild(patternContainer)
     app.stage.addChild(title)
     container.mask = title
