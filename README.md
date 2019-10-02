@@ -2,7 +2,7 @@
 
 ## `heterotopia`
 
-![](sketches/hetorotopia/preview.png)
+![](sketches/heterotopia/preview.png)
 
 
 ## `unit4_z3`
