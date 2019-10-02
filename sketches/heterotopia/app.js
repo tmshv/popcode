@@ -142,35 +142,6 @@ class Agent {
     }
 }
 
-function createInvertColorFilter() {
-    const v = -1
-    const f = new PIXI.filters.ColorMatrixFilter()
-    f.matrix = [
-        v, 0, 0, 0, 1,
-        0, v, 0, 0, 1,
-        0, 0, v, 0, 1,
-        0, 0, 0, 1, 0,
-    ]
-
-    return f
-}
-
-function createGridSprite(texture, size) {
-    const container = new PIXI.Container()
-
-    repeat(size * size)(i => {
-        const item = new PIXI.Sprite(texture)
-        // bunny.anchor.set(0.5)
-        item.x = (i % size) * 512
-        item.y = Math.floor(i / size) * 512
-
-        container.addChild(item)
-    })
-
-    return container
-}
-
-
 app.loader
     .add('title', 'title.svg')
     .add('titleBlack', 'title_black.svg')
@@ -224,17 +195,17 @@ class MetaballTextureBuilder {
         this.contrast = value
         return this
     }
-    
+
     setAgents(value) {
         this.agents = value
         return this
     }
-    
+
     setRenderStep(value) {
         this.step = value
         return this
     }
-    
+
     setAgentMassMultipier(value) {
         this.massMultiplier = value
         return this
@@ -242,7 +213,7 @@ class MetaballTextureBuilder {
 
     build() {
         const [width, height] = this.frame
-        
+
         const contrastFilter = new PIXI.filters.ColorMatrixFilter()
         contrastFilter.contrast(this.contrast)
 
@@ -279,8 +250,14 @@ class MetaballTextureBuilder {
     }
 }
 
+function calcScale(app, padding, width) {
+    const w = app.screen.width - (padding * 2)
+
+    return w / width
+}
+
 function initTest(app, resources) {
-    const padding = 50
+    const padding = 10
     const width = app.screen.width - (padding * 2)
     const height = width * 0.275
     const square = width * height
@@ -317,7 +294,7 @@ function initTest(app, resources) {
         .setRenderStep(4)
         .setAgentMassMultipier(0.01)
         .build()
-    
+
     const maskSprite1 = mask1.sprite
     maskSprite1.anchor.set(0.5)
     maskSprite1.position.set(
@@ -325,7 +302,7 @@ function initTest(app, resources) {
         app.screen.height / 2,
     )
     app.stage.addChild(maskSprite1)
-    
+
     const maskSprite2 = mask2.sprite
     maskSprite2.anchor.set(0.5)
     maskSprite2.position.set(
@@ -334,16 +311,16 @@ function initTest(app, resources) {
     )
     app.stage.addChild(maskSprite2)
 
-    const container = new PIXI.Container()
-    app.stage.addChild(container)
+    const layoutContainer = new PIXI.Container()
+    app.stage.addChild(layoutContainer)
 
     const sprite1 = new PIXI.Sprite(resources.test.texture)
     sprite1.mask = maskSprite1
-    container.addChild(sprite1)
+    layoutContainer.addChild(sprite1)
 
     const sprite2 = new PIXI.Sprite(resources.test2.texture)
     sprite2.mask = maskSprite2
-    container.addChild(sprite2)
+    layoutContainer.addChild(sprite2)
 
     app.ticker.add(() => {
         for (const agent of metaballAgents) {
@@ -360,7 +337,25 @@ function initTest(app, resources) {
     })
 }
 
+function setupContainer(container, anchor, frame, pos) {
+    const [x, y] = pos
+    const [width, height] = frame
+
+    container.pivot.x = anchor * width / container.scale.x
+    container.pivot.y = anchor * height / container.scale.y
+
+    container.x = x
+    container.y = y
+
+    return container
+}
+
 function initApp(app, resources) {
+    const padding = 50
+    const width = app.screen.width - (padding * 2)
+    const height = width * 0.275
+    const square = width * height
+
     mouse = {
         x: 0,
         y: 0,
@@ -369,25 +364,23 @@ function initApp(app, resources) {
 
     console.log(`${app.screen.width}x${app.screen.height}`)
 
-    const w = app.screen.width
-    const h = app.screen.height
+    const w = width
+    const h = height
     const v = Math.round(
         (w * h) * 0.01
     )
 
-    console.log('v', v)
-
-    const container = new PIXI.Container()
-    // app.stage.addChild(container)
+    const container = setupContainer(new PIXI.Container(), 0.5, [width, height], [
+        app.screen.width / 2,
+        app.screen.height / 2,
+    ])
+    app.stage.addChild(container)
 
     const container1 = new PIXI.Container()
     container.addChild(container1)
 
     const container2 = new PIXI.Container()
     container.addChild(container2)
-
-    // container.x = app.renderer.width / 2;
-    // container.y = app.renderer.height / 2;
 
     const circleAgents = repeat(v)(i => {
         const x = Math.random() * w
@@ -442,49 +435,31 @@ function initApp(app, resources) {
     })
 
     const agents = [...circleAgents, ...lineAgents]
-    // const agents = [...lineAgents]
 
-    // const circleGraphics = new PIXI.Graphics()
-    // container.addChild(circleGraphics)
-
-    // const texture = PIXI.Texture.from('title.svg')
-    // const title = new PIXI.Sprite(texture)
-    // const title = PIXI.Sprite.from('title.png')
     const title = new PIXI.Sprite(resources.title.texture)
-    title.scale.set(0.5)
-    // title.scale.set(2)
+    title.scale.set(calcScale(app, 10, title.width))
     title.anchor.set(0.5)
     title.position.set(
-        w / 2,
-        h / 2,
+        app.screen.width / 2,
+        app.screen.height / 2,
     )
 
     const title2 = new PIXI.Sprite(resources.titleBlack.texture)
-    // title2.filter = [createInvertColorFilter()]
-    title2.scale.set(0.5)
-    // title.scale.set(2)
+    title2.scale.set(calcScale(app, 10, title2.width))
     title2.anchor.set(0.5)
     title2.position.set(
-        w / 2,
-        h / 2,
+        app.screen.width / 2,
+        app.screen.height / 2,
     )
 
-    // let colorMatrix = new PIXI.filters.ColorMatrixFilter()
-    // colorMatrix.contrast(1000)
-    // noise.filters = [colorMatrix]
+    // const noise1 = new PIXI.Sprite(resources.noise1.texture)
+    // container1.addChild(noise1)
 
-    // const noise1 = createGridSprite(resources.noise1.texture, 5)
-    // const noise1 = new PIXI.TilingSprite(resources.noise1.texture, w, h)
-    const noise1 = new PIXI.Sprite(resources.noise1.texture)
-    container1.addChild(noise1)
+    // const noise2 = new PIXI.Sprite(resources.noise2.texture)
+    // container2.addChild(noise2)
 
-    // const noise2 = createGridSprite(resources.noise2.texture, 5)
-    // const noise2 = new PIXI.TilingSprite(resources.noise2.texture, w, h)
-    const noise2 = new PIXI.Sprite(resources.noise2.texture)
-    container2.addChild(noise2)
-
-    container1.mask = noise1
-    container2.mask = noise2
+    // container1.mask = noise1
+    // container2.mask = noise2
 
     app.stage.addChild(title2)
     app.stage.addChild(title)
@@ -505,8 +480,8 @@ function initApp(app, resources) {
             agent.run({
                 mouse,
                 border: {
-                    width: app.screen.width,
-                    height: app.screen.height,
+                    width,
+                    height,
                 }
             })
             agent.render()
