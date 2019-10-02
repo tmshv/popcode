@@ -176,6 +176,7 @@ app.loader
     .add('titleBlack', 'title_black.svg')
     .add('noise', 'noise.jpg')
     .add('test', 'test.jpg')
+    .add('test2', 'test2.jpg')
     .add('noise1', 'noise1_b.jpg')
     .add('noise2', 'noise2_b.jpg')
     .load((loader, resources) => {
@@ -183,7 +184,7 @@ app.loader
         initApp(app, resources)
     })
 
-function renderMetaball(g, factor, step, width, height, agents, color) {
+function renderMetaball(g, massMultiplier, step, width, height, agents, color) {
     g.lineStyle(0)
     g.beginFill(color, 1)
 
@@ -194,18 +195,88 @@ function renderMetaball(g, factor, step, width, height, agents, color) {
             for (const a of agents) {
                 const dx = x - a.location.x;
                 const dy = y - a.location.y;
-                const massQuad = a.mass * a.mass
+                const massQuad = a.mass * a.mass * massMultiplier
 
                 sum += massQuad / (dx * dx + dy * dy)
             }
 
-            if (sum > factor) {
+            if (sum > 1) {
                 g.drawRect(x, y, step, step)
             }
         }
     }
 
     g.endFill()
+}
+
+class MetaballTextureBuilder {
+    setFrame(width, height) {
+        this.frame = [width, height]
+        return this
+    }
+
+    setBlurValue(value) {
+        this.blur = value
+        return this
+    }
+
+    setContrastValue(value) {
+        this.contrast = value
+        return this
+    }
+    
+    setAgents(value) {
+        this.agents = value
+        return this
+    }
+    
+    setRenderStep(value) {
+        this.step = value
+        return this
+    }
+    
+    setAgentMassMultipier(value) {
+        this.massMultiplier = value
+        return this
+    }
+
+    build() {
+        const [width, height] = this.frame
+        
+        const contrastFilter = new PIXI.filters.ColorMatrixFilter()
+        contrastFilter.contrast(this.contrast)
+
+        const metaballContainer = new PIXI.Container()
+        metaballContainer.filters = [
+            new PIXI.filters.BlurFilter(this.blur),
+            contrastFilter,
+        ]
+
+        const metaballGraphics = new PIXI.Graphics()
+        metaballContainer.addChild(metaballGraphics)
+
+        const baseTexture = new PIXI.BaseRenderTexture(width, height, PIXI.SCALE_MODES.LINEAR, 1)
+        const renderTexture = new PIXI.RenderTexture(baseTexture)
+        const metaballSprite = new PIXI.Sprite(renderTexture)
+
+        return {
+            sprite: metaballSprite,
+            update: (app) => {
+                metaballGraphics.clear()
+                renderMetaball(
+                    metaballGraphics,
+                    this.massMultiplier,
+                    this.step,
+                    width,
+                    height,
+                    this.agents,
+                    0xffffff
+                )
+
+                app.renderer.render(metaballContainer, renderTexture)
+            }
+        }
+    }
 }
 
 function initTest(app, resources) {
@@ -217,19 +288,6 @@ function initTest(app, resources) {
     console.log('width', width)
     console.log('height', height)
     console.log('square', square)
-
-    const contrastFilter = new PIXI.filters.ColorMatrixFilter()
-    contrastFilter.contrast(1000)
-
-    const container = new PIXI.Container()
-    app.stage.addChild(container)
-
-    const metaballContainer = new PIXI.Container()
-    metaballContainer.filters = [
-        new PIXI.filters.BlurFilter(15),
-        contrastFilter,
-    ]
-    // app.stage.addChild(metaballContainer)
 
     const metaballAgents = repeat(15)(i => {
         const x = Math.random() * width
@@ -243,59 +301,51 @@ function initTest(app, resources) {
         return agent
     })
 
-    // const frame = new PIXI.Rectangle(10, 10, 100, 100)
-    // const orig = new PIXI.Rectangle(5, 5, 10, 10)
-    const frame = new PIXI.Rectangle(500, 500, 100, 100)
-    const trim = new PIXI.Rectangle(0, 0, 128, 128)
-
-    // const texture = new PIXI.Texture(resources.noise.texture, frame, orig, trim)
-    const texture = new PIXI.Texture(resources.test.texture)
-    // texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT
-    // texture.orig = orig
-    // texture.frame = frame
-    // texture.trim = trim
-    const sprite = new PIXI.Sprite(texture)
-    // sprite.scale.set(0.5)
-    container.addChild(sprite)
-
-    const metaballGraphics = new PIXI.Graphics()
-    metaballContainer.addChild(metaballGraphics)
-
-    // const g = new PIXI.Graphics()
-    // g.filters = [new PIXI.filters.BlurFilter(5)]
-
-    // g.lineStyle(0)
-    // g.beginFill(0xffffff, 1)
-    // g.drawCircle(0, 0, 50)
-    // g.endFill()
-    // app.stage.addChild(g)
-
-    const brt = new PIXI.BaseRenderTexture(width, height, PIXI.SCALE_MODES.LINEAR, 1)
-    const rt = new PIXI.RenderTexture(brt)
-    const metaballSprite = new PIXI.Sprite(rt)
-    metaballSprite.anchor.set(0.5)
-    metaballSprite.position.set(
+    const mask1 = (new MetaballTextureBuilder())
+        .setFrame(width, height)
+        .setBlurValue(15)
+        .setContrastValue(1000)
+        .setAgents(metaballAgents)
+        .setRenderStep(4)
+        .setAgentMassMultipier(0.1)
+        .build()
+    const mask2 = (new MetaballTextureBuilder())
+        .setFrame(width, height)
+        .setBlurValue(15)
+        .setContrastValue(1000)
+        .setAgents(metaballAgents)
+        .setRenderStep(4)
+        .setAgentMassMultipier(0.01)
+        .build()
+    
+    const maskSprite1 = mask1.sprite
+    maskSprite1.anchor.set(0.5)
+    maskSprite1.position.set(
         app.screen.width / 2,
         app.screen.height / 2,
     )
-    app.stage.addChild(metaballSprite)
+    app.stage.addChild(maskSprite1)
+    
+    const maskSprite2 = mask2.sprite
+    maskSprite2.anchor.set(0.5)
+    maskSprite2.position.set(
+        app.screen.width / 2,
+        app.screen.height / 2,
+    )
+    app.stage.addChild(maskSprite2)
 
-    container.mask = metaballSprite
+    const container = new PIXI.Container()
+    app.stage.addChild(container)
 
-    const sh = Math.sqrt(square)
+    const sprite1 = new PIXI.Sprite(resources.test.texture)
+    sprite1.mask = maskSprite1
+    container.addChild(sprite1)
+
+    const sprite2 = new PIXI.Sprite(resources.test2.texture)
+    sprite2.mask = maskSprite2
+    container.addChild(sprite2)
 
     app.ticker.add(() => {
-        metaballGraphics.clear()
-
-        // metaballGraphics.beginFill(0x000000)
-        // metaballGraphics.drawRect(0, 0, width, height + 2)
-        // metaballGraphics.endFill()
-
-        // renderMetaball(metaballGraphics, sh * 0.001, 4, width, height, metaballAgents, 0x303030)
-        // renderMetaball(metaballGraphics, sh * 0.001, 4, width, height, metaballAgents, 0x606060)
-        renderMetaball(metaballGraphics, 10, 4, width, height, metaballAgents, 0xffffff)
-        // renderMetaball(metaballGraphics, 30, 4, width, height, metaballAgents, 0x606060)
-
         for (const agent of metaballAgents) {
             agent.run({
                 border: {
@@ -303,20 +353,10 @@ function initTest(app, resources) {
                     height
                 }
             })
-
-            // metaballGraphics.lineStyle(0)
-            // metaballGraphics.beginFill(0x000000, 1)
-            // metaballGraphics.drawCircle(agent.location.x, agent.location.y, 3)
-            // metaballGraphics.endFill()
         }
 
-        app.renderer.render(metaballContainer, rt)
-
-        // console.log('tick')
-        // frame.x += 1
-        // // trim.x += 1
-        // texture.updateUvs()
-        // texture.updateUvs()
+        mask1.update(app)
+        mask2.update(app)
     })
 }
 
