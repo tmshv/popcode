@@ -257,84 +257,9 @@ function calcScale(app, padding, width) {
 }
 
 function initTest(app, resources) {
-    const padding = 10
+    const padding = 50
     const width = app.screen.width - (padding * 2)
     const height = width * 0.275
-    const square = width * height
-
-    console.log('width', width)
-    console.log('height', height)
-    console.log('square', square)
-
-    const metaballAgents = repeat(15)(i => {
-        const x = Math.random() * width
-        const y = Math.random() * height
-
-        const mass = width * 0.15
-
-        const agent = new Agent(x, y, mass)
-        agent.getVelocitySpeed = () => 1 + Math.random()
-
-        return agent
-    })
-
-    const mask1 = (new MetaballTextureBuilder())
-        .setFrame(width, height)
-        .setBlurValue(15)
-        .setContrastValue(1000)
-        .setAgents(metaballAgents)
-        .setRenderStep(4)
-        .setAgentMassMultipier(0.1)
-        .build()
-    const mask2 = (new MetaballTextureBuilder())
-        .setFrame(width, height)
-        .setBlurValue(15)
-        .setContrastValue(1000)
-        .setAgents(metaballAgents)
-        .setRenderStep(4)
-        .setAgentMassMultipier(0.01)
-        .build()
-
-    const maskSprite1 = mask1.sprite
-    maskSprite1.anchor.set(0.5)
-    maskSprite1.position.set(
-        app.screen.width / 2,
-        app.screen.height / 2,
-    )
-    app.stage.addChild(maskSprite1)
-
-    const maskSprite2 = mask2.sprite
-    maskSprite2.anchor.set(0.5)
-    maskSprite2.position.set(
-        app.screen.width / 2,
-        app.screen.height / 2,
-    )
-    app.stage.addChild(maskSprite2)
-
-    const layoutContainer = new PIXI.Container()
-    app.stage.addChild(layoutContainer)
-
-    const sprite1 = new PIXI.Sprite(resources.test.texture)
-    sprite1.mask = maskSprite1
-    layoutContainer.addChild(sprite1)
-
-    const sprite2 = new PIXI.Sprite(resources.test2.texture)
-    sprite2.mask = maskSprite2
-    layoutContainer.addChild(sprite2)
-
-    app.ticker.add(() => {
-        for (const agent of metaballAgents) {
-            agent.run({
-                border: {
-                    width,
-                    height
-                }
-            })
-        }
-
-        mask1.update(app)
-        mask2.update(app)
-    })
 }
 
 function setupContainer(container, anchor, frame, pos) {
@@ -502,7 +427,17 @@ function initApp(app, resources) {
     container1.mask = maskSprite1
     container2.mask = maskSprite2
 
+    const patternContainer = setupContainer(new PIXI.Graphics(), 0.5, [width, height], [
+        app.screen.width / 2,
+        app.screen.height / 2,
+    ])
+    const patternGraphic = new PIXI.Graphics()
+    patternContainer.addChild(patternGraphic)
+    patternContainer.mask = title
+    app.stage.addChild(patternContainer)
+    
     app.stage.addChild(title2)
+    app.stage.addChild(patternContainer)
     app.stage.addChild(title)
     container.mask = title
 
@@ -516,7 +451,28 @@ function initApp(app, resources) {
         .on('mousemove', onPointerMove)
         .on('touchmove', onPointerMove)
 
+    const patternStep = 13
+    let patternTime = 0
+    const patternWidth = (width + (height * 2)) // plus two heights cause 45 degrees
+    const patternLines = Math.round(
+        patternWidth / patternStep
+    )
+    const skipIndex = Math.round(
+        height / patternStep
+    )
+
     app.ticker.add(() => {
+        patternGraphic.clear(5, 0xff00ff, 1)
+        repeat(patternLines)(index => {
+            i = index - skipIndex
+            const angle = patternTime * i
+            const t = 2 + (1 + Math.cos(angle)) * 3
+            patternGraphic.lineStyle(t, 0xff00ff, 1)
+            patternGraphic.moveTo(i * patternStep, 0)
+            patternGraphic.lineTo(i * patternStep + height, height)
+        })
+        patternTime += 0.001
+
         for (const agent of agents) {
             agent.run({
                 mouse,
