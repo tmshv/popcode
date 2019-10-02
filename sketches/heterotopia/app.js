@@ -143,15 +143,9 @@ class Agent {
 }
 
 app.loader
-    .add('title', 'title.svg')
-    .add('titleBlack', 'title_black.svg')
-    .add('noise', 'noise.jpg')
-    .add('test', 'test.jpg')
-    .add('test2', 'test2.jpg')
-    .add('noise1', 'noise1_b.jpg')
-    .add('noise2', 'noise2_b.jpg')
+    .add('title', 'title_white.png')
+    .add('titleBlack', 'title_black.png')
     .load((loader, resources) => {
-        // initTest(app, resources)
         initApp(app, resources)
     })
 
@@ -256,12 +250,6 @@ function calcScale(app, padding, width) {
     return w / width
 }
 
-function initTest(app, resources) {
-    const padding = 50
-    const width = app.screen.width - (padding * 2)
-    const height = width * 0.275
-}
-
 function setupContainer(container, anchor, frame, pos) {
     const [x, y] = pos
     const [width, height] = frame
@@ -297,7 +285,7 @@ function initApp(app, resources) {
     console.log('height', height)
     console.log('square', square)
 
-    const metaballAgents = repeat(15)(i => {
+    const metaballAgents = repeat(25)(i => {
         const x = Math.random() * width
         const y = Math.random() * height
 
@@ -436,7 +424,7 @@ function initApp(app, resources) {
     patternContainer.mask = title
     app.stage.addChild(patternContainer)
     
-    app.stage.addChild(title2)
+    // app.stage.addChild(title2)
     app.stage.addChild(patternContainer)
     app.stage.addChild(title)
     container.mask = title
@@ -466,7 +454,7 @@ function initApp(app, resources) {
         repeat(patternLines)(index => {
             i = index - skipIndex
             const angle = patternTime * i
-            const t = 2 + (1 + Math.cos(angle)) * 3
+            const t = 2 + (1 + Math.cos(angle)) * 2
             patternGraphic.lineStyle(t, 0xff00ff, 1)
             patternGraphic.moveTo(i * patternStep, 0)
             patternGraphic.lineTo(i * patternStep + height, height)
