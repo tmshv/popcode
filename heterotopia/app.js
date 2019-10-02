@@ -148,7 +148,7 @@ class Agent {
 
 app.loader
     .add('title', 'title_white.png')
-    .add('titleBlack', 'title_black.png')
+    // .add('titleBlack', 'title_black.png')
     .load((loader, resources) => {
         initApp(app, resources)
     })
@@ -407,13 +407,13 @@ function initApp(app, resources) {
         app.screen.height / 2,
     )
 
-    const title2 = new PIXI.Sprite(resources.titleBlack.texture)
-    title2.scale.set(calcScale(app, padding, title2.width))
-    title2.anchor.set(0.5)
-    title2.position.set(
-        app.screen.width / 2,
-        app.screen.height / 2,
-    )
+    // const title2 = new PIXI.Sprite(resources.titleBlack.texture)
+    // title2.scale.set(calcScale(app, padding, title2.width))
+    // title2.anchor.set(0.5)
+    // title2.position.set(
+    //     app.screen.width / 2,
+    //     app.screen.height / 2,
+    // )
 
     container1.mask = maskSprite1
     container2.mask = maskSprite2
@@ -427,7 +427,7 @@ function initApp(app, resources) {
     patternContainer.mask = title
     app.stage.addChild(patternContainer)
 
-    app.stage.addChild(title2)
+    // app.stage.addChild(title2)
     app.stage.addChild(patternContainer)
     app.stage.addChild(title)
     container.mask = title
