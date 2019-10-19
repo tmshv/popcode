@@ -1,5 +1,9 @@
 # Popcode
 
+## [`superellipse`](https://tmshv.github.io/popcode/superellipse)
+
+![](sketches/superellipse/preview.png)
+
 ## [`heterotopia`](https://tmshv.github.io/popcode/heterotopia)
 
 ![](sketches/heterotopia/preview.png)
