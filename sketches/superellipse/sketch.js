@@ -79,7 +79,7 @@ function setup() {
 
     background(255)
 
-    const s = 60
+    const s = 40
     const [sx, sy] = layout([width, height], s)
     rectGrid(sx + 1, sy + 1, (x, y) => {
         createAgent(x, y, s)
@@ -122,7 +122,7 @@ function createAgent(r, c, size) {
     const n = random(0.5, 3)
 
     const agent = (new Agent(v))
-        .setShapeQuality(50)
+        .setShapeQuality(40)
         .setSuperellipseParameters(n, a, b)
 
     agents.push(agent)
