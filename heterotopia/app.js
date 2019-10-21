@@ -27,18 +27,10 @@ const app = new PIXI.Application({
     autoDensity: true,
     resolution: devicePixelRatio,
 });
-
 document.body.appendChild(app.view)
 
 class Vector {
     static new(x, y) {
-        return new Vector(x, y)
-    }
-
-    static fromAngle(angle){
-        const x = Math.cos(angle)
-        const y = Math.sin(angle)
-
         return new Vector(x, y)
     }
 
@@ -53,13 +45,6 @@ class Vector {
     set(x, y) {
         this.x = x
         this.y = y
-
-        return this
-    }
-
-    subtract(vector) {
-        this.x -= vector.x
-        this.y -= vector.y
 
         return this
     }
@@ -91,12 +76,6 @@ class Vector {
         const dy = this.y - vector.y
 
         return Math.sqrt(dx * dx + dy * dy)
-    }
-
-    mag(scalar){
-        return this
-			.normalaze()
-			.multiply(scalar)
     }
 }
 
