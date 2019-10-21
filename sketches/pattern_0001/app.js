@@ -1,21 +1,14 @@
-console.log('pattern_0001')
-
 let seed = 0
 
 function setup() {
-    // createCanvas(300, 300)
-    // createCanvas(windowWidth, windowHeight, WEBGL)
     createCanvas(windowWidth, windowHeight)
     pixelDensity(2)
 
     strokeCap(SQUARE)
     background(255)
-
-    // noLoop()
 }
 
 function draw() {
-    // background(0, 0, 0, 5);
     background(255)
 
     if (mouseIsPressed) {
@@ -57,7 +50,6 @@ function draw() {
 }
 
 function drawAgent(s) {
-    // arc(0, 0, s, 0, PI / 2)
     const shift = Math.round(random(0, 4))
     const sa = HALF_PI * shift
     const ea = sa + HALF_PI
