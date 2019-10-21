@@ -1,5 +1,9 @@
 # Popcode
 
+## [`pattern_0001`](https://tmshv.github.io/popcode/pattern_0001)
+
+![](sketches/pattern_0001/preview.png)
+
 ## [`superellipse`](https://tmshv.github.io/popcode/superellipse)
 
 ![](sketches/superellipse/preview.png)
