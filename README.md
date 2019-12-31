@@ -1,5 +1,13 @@
 # Popcode
 
+## [`pattern_0003`](https://tmshv.github.io/popcode/pattern_0003)
+
+![](sketches/pattern_0003/preview.png)
+
+## [`HNY2020`](https://tmshv.github.io/popcode/hny2020)
+
+![](sketches/hny2020/preview.png)
+
 ## [`pattern_0002`](https://tmshv.github.io/popcode/pattern_0002)
 
 ![](sketches/pattern_0002/preview.png)
