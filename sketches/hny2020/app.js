@@ -85,7 +85,7 @@ function initApp(app, resources) {
         const mass = width * Math.random() * 0.15
         const angle = Math.random() * (-Math.PI * 0.25)
 
-        const agent = new Agent(x, y, mass)
+        const agent = new MetaballAgent(x, y, mass)
         agent.direct(angle)
         agent.getVelocitySpeed = () => 2// + Math.random()
         agent.setFitBorderFn(fitBorderTeleport)
@@ -217,6 +217,7 @@ function initApp(app, resources) {
         .on('mousemove', onPointerMove)
         .on('touchmove', onPointerMove)
 
+    let frame = 0
     app.ticker.add(() => {
         for (const agent of agents) {
             agent.run({
@@ -233,17 +234,20 @@ function initApp(app, resources) {
         maskLines2.clear()
         for (const agent of metaballAgents) {
             agent.run({
+                frame,
                 border: {
                     width,
                     height
                 }
             })
             maskLines.beginFill(0x000077, 1)
-            maskLines.drawCircle(agent.location.x, agent.location.y, agent.mass)
+            maskLines.drawCircle(agent.location.x, agent.location.y, agent.radius)
 
             maskLines2.beginFill(0x000077, 1)
-            maskLines2.drawCircle(agent.location.x, agent.location.y, agent.mass * 0.5)
+            maskLines2.drawCircle(agent.location.x, agent.location.y, agent.radius * 0.5)
         }
+
+        frame ++
     })
 }
 

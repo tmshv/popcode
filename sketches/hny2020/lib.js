@@ -222,6 +222,14 @@ class Agent {
     }
 }
 
+class MetaballAgent extends Agent {
+    run(options) {
+        super.run(options)
+        const {frame} = options
+        this.radius = this.mass + Math.abs(Math.cos(frame * 0.01))
+    }
+}
+
 function fitBorderBump(agent, width, height) {
     if (agent.location.x < 0) {
         agent.location.x = 1
