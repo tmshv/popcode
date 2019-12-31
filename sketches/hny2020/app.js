@@ -38,76 +38,6 @@ function renderMetaball(g, massMultiplier, step, width, height, agents, color) {
     g.endFill()
 }
 
-class MetaballTextureBuilder {
-    setFrame(width, height) {
-        this.frame = [width, height]
-        return this
-    }
-
-    setBlurValue(value) {
-        this.blur = value
-        return this
-    }
-
-    setContrastValue(value) {
-        this.contrast = value
-        return this
-    }
-
-    setAgents(value) {
-        this.agents = value
-        return this
-    }
-
-    setRenderStep(value) {
-        this.step = value
-        return this
-    }
-
-    setAgentMassMultipier(value) {
-        this.massMultiplier = value
-        return this
-    }
-
-    build() {
-        const [width, height] = this.frame
-
-        const contrastFilter = new PIXI.filters.ColorMatrixFilter()
-        contrastFilter.contrast(this.contrast)
-
-        const metaballContainer = new PIXI.Container()
-        metaballContainer.filters = [
-            new PIXI.filters.BlurFilter(this.blur),
-            contrastFilter,
-        ]
-
-        const metaballGraphics = new PIXI.Graphics()
-        metaballContainer.addChild(metaballGraphics)
-
-        const baseTexture = new PIXI.BaseRenderTexture(width, height, PIXI.SCALE_MODES.LINEAR, 1)
-        const renderTexture = new PIXI.RenderTexture(baseTexture)
-        const metaballSprite = new PIXI.Sprite(renderTexture)
-
-        return {
-            sprite: metaballSprite,
-            update: (app) => {
-                metaballGraphics.clear()
-                renderMetaball(
-                    metaballGraphics,
-                    this.massMultiplier,
-                    this.step,
-                    width,
-                    height,
-                    this.agents,
-                    0xffffff
-                )
-
-                app.renderer.render(metaballContainer, renderTexture)
-            }
-        }
-    }
-}
-
 function calcScale(app, padding, width) {
     const w = app.screen.width - (padding * 2)
 
@@ -142,19 +72,17 @@ function initApp(app, resources) {
 
     console.log(`${app.screen.width}x${app.screen.height}`)
 
-    const v = Math.round(
-        (width * height) * 0.01
-    )
+    const v = Math.round(square * 0.005)
     const circlesDensity = Math.round(square * 0.02)
 
     console.log('width', width)
     console.log('height', height)
     console.log('square', square)
 
-    const metaballAgents = repeat(30)(i => {
+    const metaballAgents = repeat(20)(i => {
         const x = Math.random() * width
         const y = Math.random() * height
-        const mass = width * 0.25 //0.15
+        const mass = width * Math.random() * 0.15
         const angle = Math.random() * (-Math.PI * 0.25)
 
         const agent = new Agent(x, y, mass)
@@ -165,38 +93,11 @@ function initApp(app, resources) {
         return agent
     })
 
-    // const circlesMask = (new MetaballTextureBuilder())
-    //     .setFrame(width, height)
-    //     .setBlurValue(15)
-    //     .setContrastValue(1000)
-    //     .setAgents(metaballAgents)
-    //     .setRenderStep(4)
-    //     .setAgentMassMultipier(0.1)
-    //     .build()
-    const linesMask = (new MetaballTextureBuilder())
-        .setFrame(width, height)
-        .setBlurValue(15)
-        .setContrastValue(1000)
-        .setAgents(metaballAgents)
-        .setRenderStep(4)
-        .setAgentMassMultipier(0.01)
-        .build()
+    const maskLines = new PIXI.Graphics()
+    app.stage.addChild(maskLines)
 
-    // const maskSpriteCircles = circlesMask.sprite
-    // maskSpriteCircles.anchor.set(0.5)
-    // maskSpriteCircles.position.set(
-    //     app.screen.width / 2,
-    //     app.screen.height / 2,
-    // )
-    // app.stage.addChild(maskSpriteCircles)
-
-    const maskSpriteLines = linesMask.sprite
-    maskSpriteLines.anchor.set(0.5)
-    maskSpriteLines.position.set(
-        app.screen.width / 2,
-        app.screen.height / 2,
-    )
-    app.stage.addChild(maskSpriteLines)
+    const maskLines2 = new PIXI.Graphics()
+    app.stage.addChild(maskLines2)
 
     const container = setupContainer(new PIXI.Container(), 0.5, [width, height], [
         app.screen.width / 2,
@@ -209,6 +110,9 @@ function initApp(app, resources) {
 
     const containerLines = new PIXI.Container()
     container.addChild(containerLines)
+
+    const containerLines2 = new PIXI.Container()
+    container.addChild(containerLines2)
 
     const circleAgents = repeat(circlesDensity)(i => {
         const x = Math.random() * width
@@ -227,9 +131,8 @@ function initApp(app, resources) {
             // return interpolate(.1, 3, (dist / width))
         }
 
-        // color = 0xff7e00
         const color = 0x1ac4ff
-        const alpha = 0.5 + Math.random() * 0.5
+        const alpha = Math.random()
         const g = new PIXI.Graphics()
         g.lineStyle(0)
         g.beginFill(color, alpha)
@@ -241,6 +144,7 @@ function initApp(app, resources) {
 
         return agent
     })
+
     const lineAgents = repeat(v)(i => {
         const x = Math.random() * width
         const y = Math.random() * height
@@ -252,9 +156,9 @@ function initApp(app, resources) {
             // const dist = agent.location.distance(mouse)
             // return interpolate(5, 1, (dist / width))
         }
-        agent.run = () => {}
+        agent.run = () => { }
 
-        color = 0xff7e00
+        const color = 0xff00ff
         const g = new PIXI.Graphics()
         g.lineStyle(5, color, 1)
         g.lineTo(30, 0)
@@ -266,31 +170,40 @@ function initApp(app, resources) {
         return agent
     })
 
-    const agents = [...circleAgents, ...lineAgents]
+    const lineAgents2 = repeat(v)(i => {
+        const x = Math.random() * width
+        const y = Math.random() * height
+        const angle = Math.random() * Math.PI * 2
+
+        const agent = (new Agent(x, y)).direct(angle)
+        agent.getVelocitySpeed = (mouse) => {
+            return 1
+            // const dist = agent.location.distance(mouse)
+            // return interpolate(5, 1, (dist / width))
+        }
+        agent.run = () => { }
+
+        const color = 0xff7e00
+        const g = new PIXI.Graphics()
+        g.lineStyle(5, color, 1)
+        g.lineTo(30, 0)
+        g.endFill()
+        containerLines2.addChild(g)
+
+        agent.addGraphic(g)
+
+        return agent
+    })
+
+    const agents = [...circleAgents, ...lineAgents, ...lineAgents2]
 
     const title = new PIXI.Sprite(resources.title.texture)
-    title.scale.set(calcScale(app, padding, title.width))
-    title.anchor.set(0.5)
-    title.position.set(
-        app.screen.width / 2,
-        app.screen.height / 2,
-    )
+    title.scale.set(0.35)
 
     // MASK AGENTS WITH METABALLS
-    // containerCircles.mask = maskSpriteCircles
-    containerLines.mask = maskSpriteLines
+    containerLines.mask = maskLines
+    containerLines2.mask = maskLines2
 
-    // const patternContainer = setupContainer(new PIXI.Graphics(), 0.5, [width, height], [
-    //     app.screen.width / 2,
-    //     app.screen.height / 2,
-    // ])
-    // const patternGraphic = new PIXI.Graphics()
-    // patternContainer.addChild(patternGraphic)
-    // patternContainer.mask = title
-    // app.stage.addChild(patternContainer)
-
-    // app.stage.addChild(title2)
-    // app.stage.addChild(patternContainer)
     app.stage.addChild(title)
     container.mask = title
 
@@ -304,29 +217,7 @@ function initApp(app, resources) {
         .on('mousemove', onPointerMove)
         .on('touchmove', onPointerMove)
 
-    const patternStep = 13
-    let patternTime = 0
-    const patternWidth = (width + (height * 2)) // plus two heights cause 45 degrees
-    const patternLines = Math.round(
-        patternWidth / patternStep
-    )
-    const skipIndex = Math.round(
-        height / patternStep
-    )
-
     app.ticker.add(() => {
-        // update magenta pattern
-        // patternGraphic.clear(5, 0x00ffff, 1)
-        // repeat(patternLines)(index => {
-        //     i = index - skipIndex
-        //     const angle = patternTime * i
-        //     const t = 2 + (1 + Math.cos(angle)) * 2
-        //     patternGraphic.lineStyle(t, 0x00ffff, 1)
-        //     patternGraphic.moveTo(i * patternStep, 0)
-        //     patternGraphic.lineTo(i * patternStep + height, height)
-        // })
-        // patternTime += 0.001
-
         for (const agent of agents) {
             agent.run({
                 mouse,
@@ -338,6 +229,8 @@ function initApp(app, resources) {
             agent.render()
         }
 
+        maskLines.clear()
+        maskLines2.clear()
         for (const agent of metaballAgents) {
             agent.run({
                 border: {
@@ -345,52 +238,20 @@ function initApp(app, resources) {
                     height
                 }
             })
-        }
+            maskLines.beginFill(0x000077, 1)
+            maskLines.drawCircle(agent.location.x, agent.location.y, agent.mass)
 
-        // circlesMask.update(app)
-        linesMask.update(app)
+            maskLines2.beginFill(0x000077, 1)
+            maskLines2.drawCircle(agent.location.x, agent.location.y, agent.mass * 0.5)
+        }
     })
 }
 
 function main() {
     app.loader
-        // .add('title', '2020_white_inverse.png')
-        .add('title', '2020_2.png')
+        .add('title', '2020.png')
         .load((loader, resources) => {
             initApp(app, resources)
         })
-    // const container = new PIXI.Container()
-    // app.stage.addChild(container)
-    // const g = new PIXI.Graphics()
-    // container.addChild(g)
-
-    // g.beginFill(0x000077, 1)
-    // g.drawRect(10, 10, 50, 50)
-
-    // const body = new Flexbox(app.screen.width, app.screen.height)
-
-    // const item1 = Flexbox.new({
-    //     width: null,
-    //     height: 50,
-    //     minWidth: 50,
-    // }).setContent((x, y, w, h) => {
-    //     g.beginFill(0xff00ff, 1)
-    //     g.drawRect(x, y, w, h)
-    // })
-
-    // const item2 = Flexbox.new({
-    //     width: null,
-    //     height: 50,
-    //     minWidth: 50,
-    // }).setContent((x, y, w, h) => {
-    //     g.beginFill(0xff0000, 1)
-    //     g.drawRect(x, y, w, h)
-    // })
-
-    // body.addChild(item1)
-    // body.addChild(item2)
-
-    // body.calc()
-    // body.render()
 }
 main()
