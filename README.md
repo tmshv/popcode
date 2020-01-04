@@ -2,7 +2,7 @@
 
 ## [`pattern_0003`](https://tmshv.github.io/popcode/pattern_0003)
 
-![](sketches/pattern_0003/preview.png)
+![](sketches/pattern_0003/pattern.png)
 
 ## [`HNY2020`](https://tmshv.github.io/popcode/hny2020)
 
