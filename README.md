@@ -1,5 +1,9 @@
 # Popcode
 
+## [`unit4_z4`](https://tmshv.github.io/popcode/unit4_z4)
+
+![](sketches/unit4_z4/preview.png)
+
 ## [`pattern_0003`](https://tmshv.github.io/popcode/pattern_0003)
 
 ![](sketches/pattern_0003/pattern.png)
