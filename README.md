@@ -1,5 +1,9 @@
 # Popcode
 
+## [`20200622-digits`](https://tmshv.github.io/popcode/20200622-digits)
+
+![](sketches/20200622-digits/preview.png)
+
 ## [`unit4_z4`](https://tmshv.github.io/popcode/unit4_z4)
 
 ![](sketches/unit4_z4/preview.png)
