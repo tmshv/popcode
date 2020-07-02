@@ -1,5 +1,9 @@
 # Popcode
 
+## [`Sketch 0001`](https://tmshv.github.io/popcode/sketch_0001)
+
+![](sketches/sketch_0001/preview.png)
+
 ## [`20200622-digits`](https://tmshv.github.io/popcode/20200622-digits)
 
 ![](sketches/20200622-digits/preview.png)
