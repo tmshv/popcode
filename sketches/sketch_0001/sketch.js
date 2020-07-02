@@ -11,7 +11,6 @@ class Agent {
 
     run() {
         this.acceleration.limit(0.02)
-        // this.acceleration.setMag(0.01)
         this.velocity.add(this.acceleration)
         this.velocity.mult(0.98)
         this.pos.add(this.velocity)
@@ -28,12 +27,10 @@ let agents = []
 let forces = []
 
 function setup() {
-    // createCanvas(windowWidth, windowHeight, WEBGL)
     createCanvas(windowWidth, windowHeight)
 
     for (let i = 0; i < 5000; i++) {
         const agent = new Agent()
-        // agent.pos.set(width / 2, height / 2)
         agent.pos.set(
             random(width),
             random(height),
@@ -47,7 +44,6 @@ function setup() {
         const forceRow = []
         forces.push(forceRow)
         for (let y = 0; y < height; y += 1) {
-            // const angle = random(TWO_PI)
             const angle = noise(x * s, y * s) * TWO_PI
             const v = p5.Vector.fromAngle(angle, 5)
 
@@ -63,23 +59,6 @@ function draw() {
     // background(255)
 
     const f = 0.25
-
-    // for (let f of forces) {
-    //     // push()
-    //     // translate(f.pos.x, f.pos.y)
-
-    //     // // stroke(200)
-    //     // // strokeWeight(1)
-    //     // // line(0, 0, f.force.x, f.force.y)
-
-    //     // // stroke(0)
-    //     // // strokeWeight(3)
-    //     // // point(0, 0)
-
-    //     // stroke(0)
-
-    //     // pop()
-    // }
 
     for (let agent of agents) {
         const x = int(agent.pos.x)
@@ -111,8 +90,6 @@ function draw() {
         agent.run()
 
         translate(agent.pos.x, agent.pos.y)
-        // const sw = map(agent.velocity.mag(), 0, 3, 1, 5)
-        // strokeWeight(sw)
         drawShape()
 
         agent.acceleration.mult(0)
@@ -120,22 +97,9 @@ function draw() {
     }
 }
 
-// function mousePressed() {
-//     for (let i = 0; i < 1; i++) {
-//         const a = new Agent()
-//         a.pos.set(mouseX, mouseY)
-//         const shift = p5.Vector.fromAngle(random(TWO_PI))
-//         shift.mult(random(5))
-//         a.pos.add(shift)
-//         agents.push(a)
-//     }
-// }
-
 function drawShape() {
     strokeWeight(1)
     point(0, 0)
-    // rect(0, 0, 50, 50)
-    // line(0, 0, 50, 50)
 }
 
 function forceToMouse(agent) {
