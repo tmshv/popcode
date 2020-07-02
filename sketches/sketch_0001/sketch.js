@@ -76,7 +76,6 @@ function draw() {
     }
 
     stroke(0, 0, 0, 10)
-    // stroke(0)
     for (let agent of agents) {
         push()
 
