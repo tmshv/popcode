@@ -74,7 +74,7 @@ function setup() {
 }
 
 function draw() {
-    mouse.set(mouseX, mouseY)
+    // mouse.set(mouseX, mouseY)
     // cursor.set(mouse.x, mouse.y)
 
     // const bc = trackMode ? 'magenta' : 'white'
