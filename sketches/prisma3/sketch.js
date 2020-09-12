@@ -58,7 +58,7 @@ function setup() {
         const agent = new Agent({
             dash: createDashPattern(5, 30),
             dashColor: random(colors),
-            mass: random(1, 10),
+            mass: random(2, 10),
         })
         agent.pos.set(x, y)
         agents.push(agent)
