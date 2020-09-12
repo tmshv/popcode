@@ -1,5 +1,5 @@
-let colorPalette = ["#ffbe0b", "#fb5607", "#ff006e", "#8338ec", "#3a86ff", "#ffffff", "#000000", "#f22318", "#52db30"];
-let colors = [...colorPalette];
+let colorPalette = ["#ffbe0b", "#fb5607", "#ff006e", "#8338ec", "#3a86ff", "#f22318", "#52db30"];
+let colors = [...colorPalette]
 
 const videoWidth = 600
 const videoHeight = 500
@@ -7,16 +7,21 @@ const videoHeight = 500
 const agents = []
 let mouse = null
 let cursor = null
+let trackMode = false
 
 async function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 class Agent {
-    constructor() {
+    constructor({ dash, dashColor, mass }) {
         this.pos = createVector(0, 0)
         this.velocity = createVector(0, 0)
         this.acceleration = createVector(0, 0)
+
+        this.dash = dash
+        this.dashColor = dashColor
+        this.mass = mass
     }
 
     force(v) {
@@ -24,7 +29,6 @@ class Agent {
     }
 
     run() {
-        // this.acceleration.limit(0.2)
         this.velocity.add(this.acceleration)
         this.velocity.mult(0.98)
         this.pos.add(this.velocity)
@@ -40,7 +44,6 @@ class Agent {
 }
 
 function setup() {
-    // createCanvas(300, 300)
     createCanvas(windowWidth, windowHeight)
     // noLoop();
 
@@ -48,14 +51,22 @@ function setup() {
     cursor = createVector(0, 0)
     randomSeed(2)
 
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 50; i++) {
         let x = random() * width
         let y = random() * height
 
-        const agent = new Agent()
+        const agent = new Agent({
+            dash: createDashPattern(5, 30),
+            dashColor: random(colors),
+            mass: random(1, 10),
+        })
         agent.pos.set(x, y)
         agents.push(agent)
     }
+
+    // setInterval(() => {
+    //     shuffle(colors, true)
+    // }, 100);
 
     // initVideo().then(video => {
     //     detectPose(video)
@@ -64,31 +75,33 @@ function setup() {
 
 function draw() {
     mouse.set(mouseX, mouseY)
-    cursor.set(mouse.x, mouse.y)
+    // cursor.set(mouse.x, mouse.y)
 
-    background(colorPalette[2])
+    // const bc = trackMode ? 'magenta' : 'white'
+    const bc = 'white'
+    background(bc)
     noFill()
 
-    shuffle(colors, true)
+    // shuffle(colors, true)
+    noiseSeed(0)
     // noiseSeed(frameCount * 0.001)
 
-
     for (let a of agents) {
-        const x = a.pos.x
-        const y = a.pos.y
-        noiseLine(x, y)
+        noiseLine(a)
         drawAgent(a)
 
         // if (mousePressed)
-        {
+        if (trackMode) {
             const f = cursor.copy()
             f.sub(a.pos)
-            f.mult(0.005)
+            f.mult(0.0005)
             a.force(f)
+
+            a.dashColor = random(colors)
         }
 
         const f = createVector(random(-1, 1), random(-1, 1))
-        f.mult(2)
+        f.mult(0.5)
 
         a.force(f)
         a.run()
@@ -122,20 +135,24 @@ function drawAgent(a) {
     point(a.pos.x, a.pos.y)
 }
 
-function noiseLine(x, y) {
-    let c = 1000;
-    let points = [];
-    let arr = [];
-    for (let i = 0; i < 100; i++) {
-        arr.push(random(30));
+function createDashPattern(length, deviation) {
+    const arr = []
+    for (let i = 0; i < length; i++) {
+        arr.push(random(deviation))
     }
-    let col1 = colors[0];
-    let col2 = colors[1];
-    let sw1 = random(random(random(22))) + 1;
-    let sw2 = random(0.3, 0.95) * sw1;
+    return arr
+}
 
-    // sw1 = 1
-    // sw2 = 2
+function noiseLine(agent) {
+    let x = agent.pos.x
+    let y = agent.pos.y
+
+    let c = 500;
+    let points = [];
+    let col1 = 'black'
+
+    const solidWeight = agent.mass
+    const dashWeight = max(1, agent.mass - 4)
 
     for (let i = 0; i < c; i++) {
         let scl = 0.0008;
@@ -146,23 +163,23 @@ function noiseLine(x, y) {
         y += sin(angle);
     }
 
-    strokeWeight(sw1);
+    // draw solid line
+    strokeWeight(solidWeight);
     stroke(col1);
     beginShape();
-    for (let i = 0; i < points.length; i++) {
-        let p = points[i];
-        vertex(p.x, p.y);
+    for (let p of points) {
+        vertex(p.x, p.y)
     }
     endShape();
 
+    // draw dashed line
     push();
-    stroke(col2);
-    strokeWeight(sw2);
-    drawingContext.setLineDash(arr);
+    stroke(agent.dashColor);
+    strokeWeight(dashWeight);
+    drawingContext.setLineDash(agent.dash);
     beginShape();
-    for (let i = 0; i < points.length; i++) {
-        let p = points[i];
-        vertex(p.x, p.y);
+    for (let p of points) {
+        vertex(p.x, p.y)
     }
     endShape();
     pop();
@@ -210,15 +227,20 @@ async function initVideo() {
     // })
 }
 
-function getPartPosition(pose, part) {
+function getPartPosition(pose, part, rate) {
     const index = new Map([
         ["nose", 0],
         // "leftEye 117.5749692211819 353.46057461393485", "rightEye 205.7178095361138 345.97651262691517", "leftEar 77.94602972245866 379.2998911341805", "rightEar 281.8690584531554 369.025287553958", "leftShoulder 335.8574031132204 526.1043444681725", "rightShoulder 345.20214083779183 534.4283048280946", "leftElbow 144.93267181040244 395.8721472595453", "rightElbow 160.2078358691026 360.22959905839616", "leftWrist 131.08590852611258 411.9703953368191", "rightWrist 194.16663310128888 360.38060763466683", "leftHip 122.3829839684156 495.65892794716683", "rightHip 184.57379459128765 369.88249901203795", "leftKnee 102.41561759028451 492.66939274531865", "rightKnee 150.81288663515318 366.61378140579404", "leftAnkle 140.4927560531675 357.98865886049975", "rightAnkle 148.1822951498662 358.1219268680083"
     ])
 
     const i = index.get(part)
+    const p = pose.keypoints[i]
 
-    return pose.keypoints[i].position
+    if (p.score < rate) {
+        return null
+    }
+
+    return p.position
 }
 
 async function detectPose(video) {
@@ -241,12 +263,17 @@ async function detectPose(video) {
         //     return `${k.part} ${x} ${y}`
         // })
         // console.log(items)
-        const pos = getPartPosition(pose, 'nose')
+        const pos = getPartPosition(pose, 'nose', 0.9)
+        if (pos) {
+            trackMode = true
 
-        cursor.set(
-            map(pos.x, 0, videoWidth, 0, width),
-            map(pos.y, 0, videoHeight, 0, height),
-        )
+            cursor.set(
+                map(pos.x, 0, videoWidth, 0, width),
+                map(pos.y, 0, videoHeight, 0, height),
+            )
+        } else {
+            trackMode = false
+        }
 
         // console.log(getPartPosition(pose, 'nose'))
         // console.log(cursor)
