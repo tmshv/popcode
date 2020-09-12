@@ -78,7 +78,7 @@ function draw() {
     // cursor.set(mouse.x, mouse.y)
 
     // const bc = trackMode ? 'magenta' : 'white'
-    const bc = 'white'
+    const bc = '#fafa00'
     background(bc)
     noFill()
 
