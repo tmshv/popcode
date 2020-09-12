@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet"></script>
+</head>
+
+<body>
+    <!-- <img src="/photo_2020-09-04 17.45.53.jpeg" id="img"> -->
+    <video autoplay="true" id="video" />
+
+    <script>
+        async function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms))
+        }
+
+        function initVideo() {
+            const video = document.querySelector('#video');
+
+            // navigator.getUserMedia, elem = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
+
+            if (navigator.getUserMedia) {
+                navigator.getUserMedia({ video: true }, handleVideo, videoError);
+            }
+
+            function handleVideo(stream) {
+                // video.src = window.URL.createObjectURL(stream);
+                // video.src = URL.createObjectURL(stream);
+                video.srcObject = stream;
+
+                console.log(stream);
+
+                main()
+            }
+
+            function videoError(e) {
+                console.error(e);
+            }
+        }
+
+        async function main() {
+            const net = await posenet.load();
+
+            // const image = document.querySelector('#img')
+            // const image = document.querySelector('#video')
+            const image = document.querySelector('#video')
+
+            while (true) {
+                const pose = await net.estimateSinglePose(image, {
+                    flipHorizontal: false
+                });
+
+                // console.log(pose);
+                console.log(pose.keypoints[0].position);
+
+                await sleep(1000)
+            }
+        }
+
+        // main()
+        initVideo()
+    </script>
+</body>
+
+</html>
