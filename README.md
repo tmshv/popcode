@@ -1,5 +1,9 @@
 # Popcode
 
+## [`Forest Fire Cellular Automata`](https://tmshv.github.io/popcode/fie_ca)
+
+![](sketches/fire_ca/preview.png)
+
 ## [`Sketch 0001`](https://tmshv.github.io/popcode/sketch_0001)
 
 ![](sketches/sketch_0001/preview.png)
