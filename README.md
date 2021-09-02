@@ -1,6 +1,6 @@
 # Popcode
 
-## [`Forest Fire Cellular Automata`](https://tmshv.github.io/popcode/fie_ca)
+## [`Forest Fire Cellular Automata`](https://tmshv.github.io/popcode/fire_ca)
 
 ![](sketches/fire_ca/preview.png)
 
