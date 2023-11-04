@@ -59,8 +59,8 @@ function draw() {
     lines.forEach((line, i) => {
         if (line.closed) {
             fill("#bababa50")
-        } else {
-            noFill()
+        }else{
+        noFill()
         }
         strokeWeight(1)
         stroke("#bababa")
