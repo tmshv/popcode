@@ -180,10 +180,7 @@ function merge(lines) {
             if (seen.has(i)) {
                 continue
             }
-            for (let j = 0; j < curr.length; j++) {
-                if (i === j) {
-                    continue
-                }
+            for (let j = i+1; j < curr.length; j++) {
                 if (seen.has(j)) {
                     continue
                 }
