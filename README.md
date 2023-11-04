@@ -1,5 +1,9 @@
 # Popcode
 
+## [`Sketch 20231104`](https://tmshv.github.io/popcode/sketch_20231104)
+
+![](sketches/sketch_20231104/2023-11-04-03-31-51.png)
+
 ## [`Forest Fire Cellular Automata`](https://tmshv.github.io/popcode/fire_ca)
 
 ![](sketches/fire_ca/preview.png)
