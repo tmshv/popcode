@@ -1,0 +1,12 @@
+{
+  "name": "snowflakes",
+  "version": "0.1.0",
+  "files": [
+    "snowflakes_bg.wasm",
+    "snowflakes.js",
+    "snowflakes.d.ts"
+  ],
+  "module": "snowflakes.js",
+  "types": "snowflakes.d.ts",
+  "sideEffects": false
+}
