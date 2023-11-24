@@ -9,6 +9,11 @@ class Vector {
         this.y = y
     }
 
+    setFrom(other) {
+        this.x = other.x
+        this.y = other.y
+    }
+
     add(other) {
         this.x += other.x
         this.y += other.y
@@ -21,9 +26,9 @@ class Vector {
 }
 
 class Particle {
-    constructor(x, y, power) {
+    constructor(power) {
         this.dump = 0.99
-        this.pos = new Vector(x, y)
+        this.pos = new Vector(0, 0)
         this.vel = new Vector(0, 0)
         this.acc = new Vector(0, 0)
         this.power = power
@@ -42,18 +47,16 @@ class Particle {
 }
 
 class Emitter {
-    constructor(x, y, ttl, n) {
-        this.pos = new Vector(x, y)
+    constructor(ttl) {
+        this.pos = new Vector(0, 0)
+        this.maxTtl = ttl
         this.ttl = ttl
     }
 
     *emit(n) {
         for (let i = 0; i < n; i++) {
-            let p = new Particle(
-                mouseX,
-                mouseY,
-                random(1),
-            )
+            let p = new Particle(random(1))
+            p.pos.setFrom(this.pos)
             p.force(wind(p.pos.x, p.pos.y, 1))
             yield p
         }
@@ -63,15 +66,20 @@ class Emitter {
         this.ttl--
         return this.ttl > 0
     }
+
+    get ttlRatio() {
+        return this.ttl / this.maxTtl
+    }
 }
 
 class EmitterController {
     constructor() {
         this.last = new Vector(0, 0)
-        this.dist = 20
+        this.dist = 30
+        this.maxTtl = 75
     }
 
-    emit() {
+    create() {
         if (!mouseIsPressed) {
             return null
         }
@@ -80,12 +88,12 @@ class EmitterController {
         }
 
         this.last.set(mouseX, mouseY)
-        return new Emitter(
+        let e = new Emitter(this.maxTtl)
+        e.pos.set(
             mouseX,
             mouseY,
-            100,
-            3,
         )
+        return e
     }
 }
 
@@ -98,9 +106,11 @@ function setup() {
 
     for (let i = 0; i < 1000; i++) {
         let p = new Particle(
+            random(1),
+        )
+        p.pos.set(
             random(width),
             random(height),
-            random(1),
         )
         particles.push(p)
     }
@@ -142,7 +152,7 @@ function loopParticles() {
     let next = []
     for (let p of particles) {
         p.force(wind(p.pos.x, p.pos.y, 0.01))
-        p.force(up(p.pos.x, p.pos.y, 0.05))
+        p.force(up(p.pos.x, p.pos.y, 0.025))
         p.move()
 
         if (outOfBox(p)) {
@@ -167,15 +177,16 @@ function loopParticles() {
 }
 
 function loopEmitters() {
-    let e = emitCtrl.emit()
+    let e = emitCtrl.create()
     if (e) {
         emitters.push(e)
     }
 
     let next = []
     for (let e of emitters) {
-        for (let p of e.emit(10)) {
-            if (particles.length < 3000) {
+        let n = map(e.ttlRatio, 0, 1, 1, 5)
+        for (let p of e.emit(n)) {
+            if (particles.length < 10000) {
                 particles.push(p)
             }
         }
