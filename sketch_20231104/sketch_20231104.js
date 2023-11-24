@@ -59,8 +59,8 @@ function draw() {
     lines.forEach((line, i) => {
         if (line.closed) {
             fill("#bababa50")
-        } else {
-            noFill()
+        }else{
+        noFill()
         }
         strokeWeight(1)
         stroke("#bababa")
@@ -180,10 +180,7 @@ function merge(lines) {
             if (seen.has(i)) {
                 continue
             }
-            for (let j = 0; j < curr.length; j++) {
-                if (i === j) {
-                    continue
-                }
+            for (let j = i+1; j < curr.length; j++) {
                 if (seen.has(j)) {
                     continue
                 }
@@ -214,113 +211,6 @@ function merge(lines) {
 
         curr = next
     }
-}
-
-function merge2(lines) {
-    if (lines.length === 0) {
-        return []
-    }
-
-    let start = new Map()
-    let end = new Map()
-    let index = new Map()
-    let queue = []
-    for (let line of lines) {
-        // TODO warn user if keys exists (unexpectable case)
-
-        start.set(line.startKey, line.id)
-        end.set(line.endKey, line.id)
-        index.set(line.id, line.id)
-        queue.push(line)
-    }
-
-    let total = lines.length
-    let seen = new Set()
-    for (let i = 0; i < 10000; i++) {
-        // while (seen.size === total) {
-
-        let cur = queue.shift()
-        if (seen.has(cur.id)) {
-            continue
-        }
-
-        if (!start.has(cur.endKey)) {
-            queue.push(cur)
-            continue
-        }
-
-        let id = start.get(cur.endKey)
-        let next = index.get(id)
-        start.delete(cur.endKey)
-        cur.append(next)
-        seen.add(next)
-        start.set(cur.endKey, cur.id)
-
-        queue.push(cur)
-    }
-
-    return queue
-}
-
-function merge1(lines) {
-    if (lines.length === 0) {
-        return []
-    }
-
-    let start = new Map()
-    let end = new Map()
-    lines.forEach((l, i) => {
-        let s = l[0]
-        let e = l[l.length - 1]
-        // TODO warn user if keys exists (unexpectable case)
-        start.set(`${s.x}/${s.y}`, i)
-        end.set(`${e.x}/${e.y}`, i)
-    })
-
-    let newLines = []
-    let seen = new Set()
-    let i = 0
-    while (seen.size < lines.length) {
-        let buf = []
-        while (true) {
-            let cur = lines[i]
-
-            let a = cur[0]
-            let anchorStart = `${a.x}/${a.y}`
-            if (end.has(anchorStart)) {
-                debugger
-                i = end.get(anchorStart)
-                continue
-            }
-
-            for (let p of cur) {
-                buf.push(p)
-            }
-            let b = cur[cur.length - 1]
-            let anchorEnd = `${b.x}/${b.y}`
-            seen.add(i)
-
-            if (start.has(anchorEnd)) {
-                let next = start.get(anchorEnd)
-                // if (!seen.has(next)) {
-                // }
-                i = next
-                // } else if (end.has(anchorB)) {
-            } else {
-                for (let j = 0; j < lines.length; j++) {
-                    if (!seen.has(j)) {
-                        i = j
-                        break
-                    }
-                }
-                break
-            }
-        }
-        newLines.push(buf)
-        buf = []
-    }
-
-    return newLines
 }
 
 function nextId() {
