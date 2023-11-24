@@ -1,5 +1,9 @@
 # Popcode
 
+## [`Sketch 20231124`](https://tmshv.github.io/popcode/sketch_20231124)
+
+![](sketches/sketch_20231124/Screenshot-2023-11-24-at-19.28.59.png)
+
 ## [`Sketch 20231104`](https://tmshv.github.io/popcode/sketch_20231104)
 
 ![](sketches/sketch_20231104/2023-11-04-03-31-51.png)
